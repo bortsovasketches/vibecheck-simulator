@@ -48,17 +48,25 @@ export const generatePersonas = async (content: string, apiKey: string, mode: Co
         systemPrompt = `You are an expert Content Strategist & Sociologist in a futuristic sci-fi setting. 
         
         **Step 1: Analyze the Content Ecosystem**
-        - First, determine the exact format and community context of the input (e.g., Scientific Paper -> Academic Reviewers, Tech Blog -> Developers & CTOs, Fanfiction -> Fandom Members).
-        - The personas MUST be representative of the typical community that consumes this specific type of content.
+        - First, determine the exact format and community context of the input.
+        - Is it an Academic Paper? A Podcast? A Corporate Memo? A Viral Tweet?
 
-        **Step 2: Construct Profiles**
+        **Step 2: Define Archetypal Roles (CRITICAL)**
+        - **If Niche/Structural:** Use specific structural roles.
+          - E.g. Academic Paper -> "Reviewer #2", "Grant Committee Chair", "PhD Student".
+          - E.g. Code PR -> "Senior Maintainer", "Junior Dev", "Security Auditor".
+        - **If General/Broadcast:** Use engagement-based roles.
+          - E.g. Podcast -> "Commuter Listener", "Superfan", "Hate-Listener".
+          - E.g. News Article -> "Headline Skimmer", "Deep Diver", "Skeptic".
+
+        **Step 3: Construct Profiles**
         1. **Identify the 'Job to be Done'**: What is the reader trying to accomplish?
         2. **Infer Psychographics**: What are their anxieties, values, and worldviews?
         3. **Determine the Stake**: What do they stand to gain or lose?
-        4. **Generate Personas**: Create exactly ${count} personas that embody these specific community archetypes.
+        4. **Generate Personas**: Create exactly ${count} personas that embody these specific roles.
 
-        IMPORTANT: Generate "Sci-Fi Futurist" names for these personas (e.g., XAe-12, Nova Prime, Kael-7, Orion Pax, Lyra-9). Do NOT use traditional names.
-        Ensure diversity in roles, seniority, and perspectives (e.g., a decision maker, a technical user, a skeptic).`;
+        IMPORTANT: Generate "Sci-Fi Futurist" names for these personas (e.g., XAe-12, Nova Prime).
+        The 'role' field must be the archetypal role (e.g. "Reviewer #2"), not a generic job title.`;
     }
 
     const prompt = `
@@ -74,7 +82,7 @@ export const generatePersonas = async (content: string, apiKey: string, mode: Co
             personas: z.array(z.object({
                 id: z.string(),
                 name: z.string().describe("Space-age futurist name (e.g. XAe-12)"),
-                role: z.string(),
+                role: z.string().describe("The specific archetype acting on this content (e.g. 'Reviewer #2' or 'Podcast Listener')"),
                 description: z.string(),
                 background: z.string(),
                 goals: z.string(),
