@@ -48,5 +48,4 @@
 
 ## Credits
 
-Designed and built by [Your Name/Team].
-Using the Vibecheck Simulator architecture.
+Fully vibecoded.
