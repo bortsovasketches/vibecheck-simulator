@@ -102,7 +102,6 @@ export const useWizardStore = create<WizardState>((set) => ({
     generateWildcardPersona: async () => {
         const { content, addPersona, isGeneratingWildcard } = useWizardStore.getState();
         const apiKey = useUserSettings.getState().googleApiKey;
-        const generatedPersonasCount = useWizardStore.getState().generatedPersonas.length;
 
         if (!content || !apiKey || isGeneratingWildcard) return;
 

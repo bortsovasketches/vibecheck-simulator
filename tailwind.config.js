@@ -17,8 +17,9 @@ export default {
         },
         extend: {
             fontFamily: {
-                sans: ["Inter", "sans-serif"],
+                sans: ["JetBrains Mono", "monospace"],
                 serif: ["Playfair Display", "serif"],
+                mono: ["JetBrains Mono", "monospace"],
             },
             colors: {
                 border: "hsl(var(--border))",
@@ -80,6 +81,11 @@ export default {
                 "float": {
                     "0%, 100%": { transform: "translateY(0)" },
                     "50%": { transform: "translateY(-5px)" },
+                },
+                "bg-pan": {
+                    "0%": { backgroundPosition: "0% 50%" },
+                    "50%": { backgroundPosition: "100% 50%" },
+                    "100%": { backgroundPosition: "0% 50%" },
                 }
             },
             animation: {
@@ -88,6 +94,10 @@ export default {
                 "fade-in-up": "fade-in-up 0.5s ease-out forwards",
                 "shimmer": "shimmer 2s linear infinite",
                 "float": "float 3s ease-in-out infinite",
+                "bg-pan": "bg-pan 15s ease infinite",
+            },
+            transitionTimingFunction: {
+                'spring': 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
             },
         },
     },

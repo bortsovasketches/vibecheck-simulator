@@ -8,8 +8,15 @@ let mainWindow = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 800,
+        width: 1280,
+        height: 900,
+        titleBarStyle: 'hiddenInset', // macOS
+        frame: false, // Windows/Linux
+        transparent: true,
+        backgroundColor: '#00000000', // Transparent init to prevent white flash
+        vibrancy: 'under-window', // macOS blur effect
+        visualEffectState: 'active',
+        trafficLightPosition: { x: 20, y: 20 },
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,

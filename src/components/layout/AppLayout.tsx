@@ -1,101 +1,132 @@
 import { motion } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { cn } from '@/lib/utils';
 import {
-    LayoutDashboard,
-    Users,
-    FileText,
-    Settings,
-    Zap
+  LayoutDashboard,
+  Users,
+  FileText,
+  Settings,
+  Zap,
+  KeyRound,
 } from 'lucide-react';
 
+const steps = [
+  { id: 'api-key', label: 'Connect', icon: KeyRound },
+  { id: 'content-input', label: 'Input', icon: FileText },
+  { id: 'persona-selection', label: 'Personas', icon: Users },
+  { id: 'analysis', label: 'Analysis', icon: Zap },
+  { id: 'report', label: 'Report', icon: LayoutDashboard },
+] as const;
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
-    const { currentStep } = useWizardStore();
+  const { currentStep } = useWizardStore();
+  const currentIndex = steps.findIndex((step) => step.id === currentStep);
+  const dragRegionStyle = { WebkitAppRegion: 'drag' } as CSSProperties & {
+    WebkitAppRegion: 'drag';
+  };
+  const noDragRegionStyle = { WebkitAppRegion: 'no-drag' } as CSSProperties & {
+    WebkitAppRegion: 'no-drag';
+  };
 
-    // Map internal step IDs to UI steps for the sidebar
-    // We only show the main 3 steps in the sidebar for simplicity in this Artisan view
-    const mainSteps = [
-        { id: 'content-input', label: 'Input', icon: FileText },
-        { id: 'persona-selection', label: 'Personas', icon: Users },
-        { id: 'analysis', label: 'Analysis', icon: Zap },
-        { id: 'report', label: 'Report', icon: LayoutDashboard },
-    ];
+  return (
+    <div className="app-shell h-screen w-full text-foreground overflow-hidden">
+      <div className="mesh-grid" />
+      <div className="fixed top-0 left-0 right-0 h-9 z-50" style={dragRegionStyle} />
 
-    const getStepStatus = (stepId: string) => {
-        const stepOrder = ['api-key', 'content-input', 'persona-selection', 'analysis', 'report'];
-        const currentIndex = stepOrder.indexOf(currentStep);
-        const stepIndex = stepOrder.indexOf(stepId);
+      <div className="relative z-10 h-full flex">
+        <aside
+          className="hidden lg:flex w-72 p-5"
+          style={noDragRegionStyle}
+        >
+          <div className="surface-panel w-full p-5 flex flex-col">
+            <div className="flex items-center gap-3 pb-6 border-b border-border/70">
+              <div className="size-11 rounded-xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center font-bold text-lg soft-ring">
+                V
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Content Resonator</p>
+                <h1 className="text-lg font-serif">Vibecheck OS</h1>
+              </div>
+            </div>
 
-        if (stepIndex < currentIndex) return 'completed';
-        if (stepIndex === currentIndex) return 'current';
-        return 'upcoming';
-    };
-
-    return (
-        <div className="flex h-screen w-full bg-background text-foreground overflow-hidden font-sans selection:bg-primary/20 selection:text-primary">
-            {/* Modernized Floating Sidebar - Added margin on all sides, proper shadow */}
-            <aside className="w-20 lg:w-24 my-6 ml-6 rounded-3xl glass-panel flex flex-col items-center justify-between py-8 z-[100] shadow-2xl border border-white/5">
-                {/* Brand Logo */}
-                <div className="size-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_0_20px_rgba(var(--primary),0.3)] hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <span className="font-serif font-black text-white text-2xl">V</span>
-                </div>
-
-                {/* Navigation Dock */}
-                <div className="flex flex-col gap-6 w-full px-2">
-                    {mainSteps.map((step) => {
-                        const status = getStepStatus(step.id);
-                        const isActive = status === 'current';
-                        const isCompleted = status === 'completed';
-
-                        return (
-                            <div key={step.id} className="relative group flex flex-col items-center gap-1 cursor-default">
-                                <div
-                                    className={cn(
-                                        "size-12 rounded-xl flex items-center justify-center transition-all duration-300 relative",
-                                        isActive ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110" :
-                                            isCompleted ? "bg-primary/10 text-primary" :
-                                                "bg-transparent text-muted-foreground hover:bg-muted/30"
-                                    )}
-                                >
-                                    <step.icon className={cn("size-5 transition-transform", isActive && "animate-pulse")} />
-
-                                    {/* Active Indicator Dot */}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="active-nav"
-                                            className="absolute -right-2 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-l-full"
-                                        />
-                                    )}
-                                </div>
-                                <span className={cn(
-                                    "text-[9px] font-mono uppercase tracking-wider transition-opacity duration-300",
-                                    isActive ? "opacity-100 font-bold text-primary" : "opacity-0 group-hover:opacity-100 text-muted-foreground"
-                                )}>
-                                    {step.label}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Settings / Footer */}
-                <div className="flex flex-col gap-4">
-                    <div className="size-10 rounded-full hover:bg-muted/50 flex items-center justify-center transition-colors cursor-pointer text-muted-foreground hover:text-foreground">
-                        <Settings className="size-5" />
+            <div className="mt-6 space-y-2">
+              {steps.map((step, idx) => {
+                const Icon = step.icon;
+                const isCurrent = idx === currentIndex;
+                const isDone = idx < currentIndex;
+                return (
+                  <div
+                    key={step.id}
+                    className={cn(
+                      'rounded-xl border px-3 py-3 transition-all duration-200',
+                      isCurrent
+                        ? 'bg-primary/10 border-primary/35 text-foreground'
+                        : isDone
+                        ? 'bg-accent/10 border-accent/30'
+                        : 'bg-white/60 border-border/75 text-muted-foreground'
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={cn(
+                          'size-8 rounded-lg flex items-center justify-center',
+                          isCurrent
+                            ? 'bg-primary text-white'
+                            : isDone
+                            ? 'bg-accent text-white'
+                            : 'bg-secondary text-muted-foreground'
+                        )}
+                      >
+                        <Icon className="size-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.2em]">Step {idx + 1}</p>
+                        <p className="text-sm font-semibold">{step.label}</p>
+                      </div>
                     </div>
-                </div>
-            </aside>
+                  </div>
+                );
+              })}
+            </div>
 
-            {/* Main Content Area - removed relative offset, centered correctly */}
-            <main className="flex-1 overflow-y-auto overflow-x-hidden relative scroll-smooth">
-                <div className="absolute inset-0 z-0 pointer-events-none">
-                    {/* Background gradient handled in index.css body */}
-                </div>
-                {/* Increased max-width and adjusted padding for breathing room */}
-                <div className="relative z-10 w-full max-w-7xl h-full p-6 lg:p-10 mx-auto flex flex-col">
-                    {children}
-                </div>
-            </main>
-        </div>
-    );
+            <div className="mt-auto pt-6 border-t border-border/70">
+              <button className="w-full rounded-xl border border-border bg-white/75 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:border-primary/35 transition-colors flex items-center gap-2 justify-center">
+                <Settings className="size-4" /> Preferences
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <main className="flex-1 min-w-0 h-full overflow-auto">
+          <div className="lg:hidden sticky top-0 z-40 px-4 pt-12 pb-3 bg-background/80 backdrop-blur-md border-b border-border/70">
+            <div className="flex items-center justify-between">
+              <h1 className="text-lg font-serif">Vibecheck OS</h1>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Step {currentIndex + 1}/5</p>
+            </div>
+            <div className="mt-3 grid grid-cols-5 gap-1.5">
+              {steps.map((step, idx) => (
+                <div
+                  key={step.id}
+                  className={cn(
+                    'h-1.5 rounded-full',
+                    idx <= currentIndex ? 'bg-primary' : 'bg-secondary'
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="max-w-7xl mx-auto h-full px-4 pb-5 pt-4 lg:pt-14 lg:px-8 lg:pb-8"
+          >
+            {children}
+          </motion.div>
+        </main>
+      </div>
+    </div>
+  );
 }
