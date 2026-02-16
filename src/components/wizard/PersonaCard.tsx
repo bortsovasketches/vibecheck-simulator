@@ -51,13 +51,13 @@ export function PersonaCard({ persona, isSelected, onToggle, isWildcard }: Perso
     <motion.div layout whileHover={{ y: -2 }} whileTap={{ scale: 0.995 }} className="h-full">
       <div
         className={cn(
-          'surface-panel h-full flex flex-col cursor-pointer transition-all duration-200 relative overflow-hidden border',
-          isSelected ? 'border-primary/45 soft-ring' : 'border-border/90 hover:border-primary/25'
+          'surface-panel h-full flex flex-col cursor-pointer transition-all duration-200 relative overflow-hidden border-2',
+          isSelected ? 'border-blue-500 bg-blue-50/10 soft-ring' : 'border-border/60 hover:border-blue-300/50'
         )}
         onClick={() => onToggle(persona)}
       >
         {isSelected && (
-          <div className="absolute top-3 right-3 z-20 rounded-lg bg-primary text-white p-1.5 shadow-sm">
+          <div className="absolute top-3 right-3 z-20 rounded-lg bg-blue-600 text-white p-1.5 shadow-sm ring-2 ring-white">
             <Check className="size-3.5" />
           </div>
         )}

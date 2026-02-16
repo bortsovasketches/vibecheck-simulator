@@ -53,11 +53,34 @@ export function ReportView() {
     toast.info('Generating PDF report...');
 
     try {
-      const dataUrl = await toPng(element, {
+      // Create a clone of the element to render the full scrollable height
+      const clone = element.cloneNode(true) as HTMLElement;
+
+      // Apply styles to ensure full visibility in the clone
+      clone.style.height = 'auto';
+      clone.style.overflow = 'visible';
+      clone.style.position = 'absolute';
+      clone.style.top = '-9999px';
+      clone.style.left = '0';
+      clone.style.width = `${element.offsetWidth}px`;
+      clone.className = element.className; // Preserve classes
+
+      // Append to body temporarily
+      document.body.appendChild(clone);
+
+      // Wait a tick for styles to apply and images to load if needed
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const dataUrl = await toPng(clone, {
         cacheBust: true,
         filter: (node) => !node.classList?.contains('no-export'),
         backgroundColor: '#0c0a15', // Ensure dark background
+        height: clone.scrollHeight,
+        width: clone.scrollWidth,
       });
+
+      // Cleanup
+      document.body.removeChild(clone);
 
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -73,41 +96,19 @@ export function ReportView() {
       let heightLeft = pdfHeight;
       let position = 0;
 
+      // Add first page
       pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
       heightLeft -= pageHeight;
 
-      // Simple pagination if content is long
-      while (heightLeft >= 0) {
-        position = heightLeft - pdfHeight; // This logic might be slightly off for multiple pages, but basic usually suffices for single page apps 
-        // Actually, let's keep it simple: just one long page or fit to page?
-        // jsPDF addImage doesn't implicitly page break.
-        // For now, let's just add the image. If it's too long, it will be cut or shrink.
-        // Better:
-        /*
-        let heightLeft = pdfHeight;
-        let position = 0;
-
-        pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
+      // Add subsequent pages if content overflows
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight; // Shift position up
+        pdf.addPage();
+        // Calculate the position for the next page segment
+        // The negative position moves the image up to show the next chunk
+        pdf.addImage(dataUrl, 'PNG', 0, -(pdfHeight - heightLeft), pdfWidth, pdfHeight);
         heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-          position = heightLeft - pdfHeight;
-          pdf.addPage();
-          pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
-          heightLeft -= pageHeight;
-        }
-        */
-        break; // Disable multi-page loop for now as it duplicates the top of image if not cropped.
       }
-
-      // If content > page, let's just make the PDF page taller?
-      // Or just scale to fit width and let height be whatever.
-      // But A4 is standard. 
-      // Let's stick to simple "Fit to Width" and if it spills, users can scroll in PDF reader or we accept cut off.
-      // Actually, many users prefer a single long page PDF for digital reports.
-      // But "a4" format enforces page size.
-      // Let's try to pass [pdfWidth, pdfHeight] as format if needed?
-      // For standard export, let's stick to A4 and just print it.
 
       pdf.save(`vibecheck-report-${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success('PDF downloaded successfully');

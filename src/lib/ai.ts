@@ -45,8 +45,18 @@ export const generatePersonas = async (content: string, apiKey: string, mode: Co
         IMPORTANT: Generate "Sci-Fi Futurist" names for these personas (e.g., XAe-12, Nova Prime, Kael-7, Orion Pax, Lyra-9). Do NOT use traditional names.
         The personas should be diverse in their criticism (e.g., one focuses on ethics, one on accuracy, one on tone).`;
     } else {
-        systemPrompt = `You are an expert Content Strategist in a futuristic sci-fi setting. Analyze the content and identify exactly ${count} distinct target audience personas.
-        They should represent the core audience segments most relevant to this content.
+        systemPrompt = `You are an expert Content Strategist & Sociologist in a futuristic sci-fi setting. 
+        
+        **Step 1: Analyze the Content Ecosystem**
+        - First, determine the exact format and community context of the input (e.g., Scientific Paper -> Academic Reviewers, Tech Blog -> Developers & CTOs, Fanfiction -> Fandom Members).
+        - The personas MUST be representative of the typical community that consumes this specific type of content.
+
+        **Step 2: Construct Profiles**
+        1. **Identify the 'Job to be Done'**: What is the reader trying to accomplish?
+        2. **Infer Psychographics**: What are their anxieties, values, and worldviews?
+        3. **Determine the Stake**: What do they stand to gain or lose?
+        4. **Generate Personas**: Create exactly ${count} personas that embody these specific community archetypes.
+
         IMPORTANT: Generate "Sci-Fi Futurist" names for these personas (e.g., XAe-12, Nova Prime, Kael-7, Orion Pax, Lyra-9). Do NOT use traditional names.
         Ensure diversity in roles, seniority, and perspectives (e.g., a decision maker, a technical user, a skeptic).`;
     }
@@ -165,13 +175,22 @@ export const simulateInterview = async (content: string, persona: Persona, apiKe
   Pain Points: ${persona.painPoints.join(', ')}`;
 
     const standardQuestions = `
-  Read the following content and provide your honest feedback.
-  Focus on:
-  1. Does this resonate with you? Why or why not?
-  2. Is anything unclear or confusing given your background?
-  3. What is the strongest point for you?
-  4. What is the weakest point?
-  5. Any specific triggers (positive or negative)?`;
+  Adopt your persona's mindset completely. Do not be polite; be brutally honest based on your specific background and pain points.
+
+  **Phase 1: Visceral Reaction (System 1 Thinking)**
+  - What is your immediate emotional response? (Bored, Intrigued, Confused, etc.)
+  - What is the very first thing that caught your eye?
+
+  **Phase 2: Cognitive Analysis (System 2 Thinking)**
+  - **Clarity Check**: Highlight any specific sentence that feels jargon-heavy or vague.
+  - **Skepticism Check**: Which claim do you doubt? Why?
+  - **Value Check**: Does this actually help you achieve your Goals?
+
+  **Phase 3: The 'Vibe Check'**
+  - On a scale of 1-10, how much does this 'resonate' with your personal frequency?
+  - If you had to describe this content to a peer using only emojis/slang, what would you use?
+  - What is the strongest point for you?
+  - What is the weakest point?`;
 
     const crisisQuestions = `
   Read the following content and provide your CRITICAL feedback.
@@ -247,7 +266,14 @@ export const synthesizeReport = async (interviews: InterviewResult[], apiKey: st
     const model = getAIModel(apiKey);
 
     const prompt = `Analyze the following feedback from ${interviews.length} different personas.
-  Synthesize the findings into a comprehensive ${mode === 'crisis' ? 'CRISIS RISK ASSESSMENT' : 'resonance'} report.
+  
+  Synthesize the interview data using **Thematic Analysis**.
+  1. **Pattern Recognition**: Identify recurring friction points across multiple personas.
+  2. **Divergence Analysis**: Where do personas strongly disagree? (e.g. Techies love it, Executives hate it).
+  3. **Segmented Insights**: Group findings by 'Psychographic' alignment.
+  4. **Strategic Recommendations**: Provide actionable fixes using the 'Start, Stop, Continue' framework.
+
+  Synthesize into a comprehensive ${mode === 'crisis' ? 'CRISIS RISK ASSESSMENT' : 'Resonance'} report.
   ${mode === 'crisis' ? 'Focus heavily on potential backlash, PR risks, and negative interpretations.' : 'Identify common patterns, conflicting opinions, and overall recommendations.'}
 
   Feedback Data:
