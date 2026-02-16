@@ -9,9 +9,8 @@ export const getAIModel = (apiKey: string) => {
     const google = createGoogleGenerativeAI({
         apiKey,
     });
-    // User requested "Gemini 3", but using the likely latest stable version available.
-    // If 2.0-flash is not found, we might need to fallback or check API key permissions.
-    return google('gemini-2.0-flash-001');
+    // User requested "Gemini 3" based on latest documentation.
+    return google('gemini-3.0-pro-001');
 };
 
 export type ContentMode = 'standard' | 'crisis';
