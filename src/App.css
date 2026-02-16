@@ -1,0 +1,10 @@
+/* src/App.css */
+#root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+  /* AppLayout handles the scrolling */
+}

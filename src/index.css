@@ -1,0 +1,225 @@
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/700.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Midnight Electric Theme - Deep, Cosmic, Vibrant */
+    --background: 260 30% 6%;
+    /* Deep Void Purple */
+    --foreground: 260 10% 96%;
+    /* Starlight White */
+
+    /* Glass Cards */
+    --card: 260 30% 9%;
+    --card-foreground: 260 10% 96%;
+
+    --popover: 260 30% 9%;
+    --popover-foreground: 260 10% 96%;
+
+    /* Electric Indigo */
+    --primary: 250 95% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Neon Rose for Accents */
+    --accent: 330 90% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted Slate-Purple */
+    --secondary: 260 20% 15%;
+    --secondary-foreground: 260 10% 80%;
+
+    --muted: 260 20% 15%;
+    --muted-foreground: 260 10% 65%;
+
+    --destructive: 345 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Glows & Borders */
+    --border: 260 30% 18%;
+    --input: 260 30% 18%;
+    --ring: 250 95% 65%;
+
+    --radius: 0.75rem;
+  }
+
+  /* Force Dark Mode aesthetic by default for "vibecheck" */
+  .dark {
+    --background: 260 30% 6%;
+    --foreground: 260 10% 96%;
+    --card: 260 30% 9%;
+    --card-foreground: 260 10% 96%;
+    --popover: 260 30% 9%;
+    --popover-foreground: 260 10% 96%;
+    --primary: 250 95% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 20% 15%;
+    --secondary-foreground: 260 10% 80%;
+    --muted: 260 20% 15%;
+    --muted-foreground: 260 10% 65%;
+    --accent: 330 90% 65%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 345 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 260 30% 18%;
+    --input: 260 30% 18%;
+    --ring: 250 95% 65%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+
+    /* Cosmic Gradient Background */
+    background-image:
+      radial-gradient(circle at 15% 50%, hsla(250, 95%, 65%, 0.08), transparent 25%),
+      radial-gradient(circle at 85% 30%, hsla(330, 90%, 65%, 0.08), transparent 25%);
+    background-attachment: fixed;
+  }
+
+  /* Typography Overrides */
+  /* Limit Playfair to massive structural headers to look like a glossy magazine */
+  h1,
+  .font-serif {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.03em;
+  }
+
+  /* Use Inter for standard structural headings */
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  /* Make sure monospaced text is crisp */
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    /* Add slight tracking to small mono caps */
+  }
+}
+
+/* Slick Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(var(--border));
+  border-radius: 99px;
+  border: 2px solid hsl(var(--background));
+  /* Visual padding */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(var(--primary) / 0.5);
+}
+
+/* Selection */
+::selection {
+  background-color: hsla(var(--primary) / 0.3);
+  color: hsl(var(--primary-foreground));
+}
+
+@layer utilities {
+
+  /* Premium Glass Panel */
+  .glass-panel {
+    background: hsla(260, 30%, 9%, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsla(260, 10%, 90%, 0.08);
+    box-shadow:
+      0 4px 30px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px hsla(0, 0%, 100%, 0.05);
+  }
+
+  /* Content Container Card - Distinct from background */
+  .content-card {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  /* Neon Border Glow */
+  .glow-border {
+    border: 1px solid hsla(var(--primary) / 0.3);
+    box-shadow: 0 0 15px hsla(var(--primary) / 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .glow-border:hover {
+    border-color: hsla(var(--primary) / 0.6);
+    box-shadow: 0 0 25px hsla(var(--primary) / 0.3);
+  }
+
+  /* Artisan Card Upgrade */
+  .artisan-card {
+    background: linear-gradient(145deg, hsla(260, 30%, 11%, 0.9), hsla(260, 30%, 9%, 0.95));
+    border: 1px solid hsla(260, 10%, 90%, 0.05);
+    border-radius: 0.75rem;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 0 hsla(0, 0%, 100%, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .artisan-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 0 hsla(0, 0%, 100%, 0.1);
+  }
+
+  .text-gradient {
+    background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+
+  /* Animation Utilities */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
