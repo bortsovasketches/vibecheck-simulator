@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Users,
   FileText,
-  Settings,
   Zap,
   KeyRound,
 } from 'lucide-react';
@@ -63,8 +62,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       isCurrent
                         ? 'bg-primary/10 border-primary/35 text-foreground'
                         : isDone
-                        ? 'bg-accent/10 border-accent/30'
-                        : 'bg-white/60 border-border/75 text-muted-foreground'
+                          ? 'bg-accent/10 border-accent/30'
+                          : 'bg-white/60 border-border/75 text-muted-foreground'
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -74,8 +73,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           isCurrent
                             ? 'bg-primary text-white'
                             : isDone
-                            ? 'bg-accent text-white'
-                            : 'bg-secondary text-muted-foreground'
+                              ? 'bg-accent text-white'
+                              : 'bg-secondary text-muted-foreground'
                         )}
                       >
                         <Icon className="size-4" />
@@ -90,11 +89,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               })}
             </div>
 
-            <div className="mt-auto pt-6 border-t border-border/70">
-              <button className="w-full rounded-xl border border-border bg-white/75 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:border-primary/35 transition-colors flex items-center gap-2 justify-center">
-                <Settings className="size-4" /> Preferences
-              </button>
-            </div>
+
           </div>
         </aside>
 

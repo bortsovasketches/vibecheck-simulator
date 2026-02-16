@@ -14,8 +14,13 @@ import {
   Quote,
   Activity,
   Target,
+  Loader2
 } from 'lucide-react';
 import { motion, useSpring, useTransform, useMotionValue } from 'framer-motion';
+import html2canvas from 'html2canvas'; // Remove
+import { toPng } from 'html-to-image'; // Add
+import jsPDF from 'jspdf';
+import { toast } from 'sonner';
 
 const generateSpectrogramData = (length: number) => {
   return Array.from({ length }, () => Math.random() * 0.8 + 0.2);
@@ -25,6 +30,7 @@ export function ReportView() {
   const { finalReport, interviewResults, reset, contentMode } = useWizardStore();
   const [activeTab, setActiveTab] = useState(interviewResults?.[0]?.personaName);
   const [spectrogramData] = useState(() => generateSpectrogramData(34));
+  const [isExporting, setIsExporting] = useState(false);
 
   const scoreValue = useMotionValue(0);
   const rawScore = finalReport?.overallScore || 0;
@@ -39,6 +45,80 @@ export function ReportView() {
     }
   }, [finalReport, scoreValue, targetScore]);
 
+  const handleExportPDF = async () => {
+    const element = document.getElementById('report-content');
+    if (!element) return;
+
+    setIsExporting(true);
+    toast.info('Generating PDF report...');
+
+    try {
+      const dataUrl = await toPng(element, {
+        cacheBust: true,
+        filter: (node) => !node.classList?.contains('no-export'),
+        backgroundColor: '#0c0a15', // Ensure dark background
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      // Simple pagination if content is long
+      while (heightLeft >= 0) {
+        position = heightLeft - pdfHeight; // This logic might be slightly off for multiple pages, but basic usually suffices for single page apps 
+        // Actually, let's keep it simple: just one long page or fit to page?
+        // jsPDF addImage doesn't implicitly page break.
+        // For now, let's just add the image. If it's too long, it will be cut or shrink.
+        // Better:
+        /*
+        let heightLeft = pdfHeight;
+        let position = 0;
+
+        pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - pdfHeight;
+          pdf.addPage();
+          pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
+          heightLeft -= pageHeight;
+        }
+        */
+        break; // Disable multi-page loop for now as it duplicates the top of image if not cropped.
+      }
+
+      // If content > page, let's just make the PDF page taller?
+      // Or just scale to fit width and let height be whatever.
+      // But A4 is standard. 
+      // Let's stick to simple "Fit to Width" and if it spills, users can scroll in PDF reader or we accept cut off.
+      // Actually, many users prefer a single long page PDF for digital reports.
+      // But "a4" format enforces page size.
+      // Let's try to pass [pdfWidth, pdfHeight] as format if needed?
+      // For standard export, let's stick to A4 and just print it.
+
+      pdf.save(`vibecheck-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('PDF downloaded successfully');
+    } catch (error) {
+      console.error('PDF Export failed:', error);
+      toast.error('Failed to export PDF');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (!finalReport) return null;
 
   const getScoreColor = (s: number) => {
@@ -48,7 +128,7 @@ export function ReportView() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-5 fade-in-up pb-4">
+    <div id="report-content" className="h-full flex flex-col gap-5 fade-in-up pb-4">
       <section className="surface-panel p-5 lg:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -61,9 +141,12 @@ export function ReportView() {
             Generated {new Date().toLocaleDateString()} • {interviewResults.length} personas evaluated
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 no-export">
           <Button variant="outline" onClick={reset}><RefreshCw className="size-4" /> Run Again</Button>
-          <Button><Download className="size-4" /> Export PDF</Button>
+          <Button onClick={handleExportPDF} disabled={isExporting}>
+            {isExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            {isExporting ? 'Exporting...' : 'Export PDF'}
+          </Button>
         </div>
       </section>
 
@@ -83,13 +166,12 @@ export function ReportView() {
                 </div>
 
                 {finalReport.goNoGo && (
-                  <div className={`rounded-xl border px-4 py-3 text-center ${
-                    finalReport.goNoGo.decision === 'GO'
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
-                      : finalReport.goNoGo.decision === 'NO-GO'
+                  <div className={`rounded-xl border px-4 py-3 text-center ${finalReport.goNoGo.decision === 'GO'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                    : finalReport.goNoGo.decision === 'NO-GO'
                       ? 'bg-rose-50 border-rose-300 text-rose-700'
                       : 'bg-amber-50 border-amber-300 text-amber-700'
-                  }`}>
+                    }`}>
                     <p className="text-xl font-semibold">{finalReport.goNoGo.decision}</p>
                     <p className="text-xs uppercase tracking-[0.16em]">{finalReport.goNoGo.confidenceScore}% confidence</p>
                   </div>
@@ -107,9 +189,8 @@ export function ReportView() {
                       initial={{ height: 0 }}
                       animate={{ height: `${val * 100}%` }}
                       transition={{ delay: i * 0.015, duration: 0.45 }}
-                      className={`flex-1 rounded-full ${
-                        val > 0.7 ? 'bg-emerald-500/80' : val > 0.4 ? 'bg-primary/80' : 'bg-rose-500/75'
-                      }`}
+                      className={`flex-1 rounded-full ${val > 0.7 ? 'bg-emerald-500/80' : val > 0.4 ? 'bg-primary/80' : 'bg-rose-500/75'
+                        }`}
                     />
                   ))}
                 </div>

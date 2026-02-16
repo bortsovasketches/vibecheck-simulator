@@ -2,27 +2,23 @@ import { useState, useCallback } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Type, Youtube, Upload, ArrowRight, Sparkles, FileText, Loader2, Link2 } from 'lucide-react';
-import { YoutubeTranscript } from 'youtube-transcript';
+import { Type, Upload, Sparkles, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
 
 const modes = [
   { id: 'text', icon: Type, label: 'Editor' },
-  { id: 'youtube', icon: Youtube, label: 'YouTube' },
   { id: 'file', icon: Upload, label: 'File' },
 ] as const;
 
 export function ContentInputStep() {
   const { content, setContent, setStep } = useWizardStore();
   const [inputText, setInputText] = useState(content || '');
-  const [activeMode, setActiveMode] = useState<'text' | 'youtube' | 'file'>('text');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [isFetchingYoutube, setIsFetchingYoutube] = useState(false);
+  const [activeMode, setActiveMode] = useState<'text' | 'file'>('text');
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -55,24 +51,6 @@ export function ContentInputStep() {
     setStep('persona-selection');
   };
 
-  const handleYoutubeFetch = async () => {
-    if (!youtubeUrl.trim()) return;
-    setIsFetchingYoutube(true);
-
-    try {
-      const transcript = await YoutubeTranscript.fetchTranscript(youtubeUrl);
-      const text = transcript.map((t) => t.text).join(' ');
-      setInputText(text);
-      setActiveMode('text');
-      toast.success('Transcript extracted');
-    } catch (error) {
-      console.error(error);
-      toast.error('Could not read captions from this video URL.');
-    } finally {
-      setIsFetchingYoutube(false);
-    }
-  };
-
   return (
     <div className="h-full" {...getRootProps()}>
       <input {...getInputProps()} />
@@ -84,7 +62,7 @@ export function ContentInputStep() {
               <p className="text-xs uppercase tracking-[0.2em] text-primary">Input Pipeline</p>
               <h2 className="mt-1 text-3xl lg:text-4xl">Feed Your Content</h2>
               <p className="mt-2 text-sm text-muted-foreground max-w-2xl leading-relaxed">
-                Paste text, pull captions from YouTube, or drop a plain text file. We keep this step lightweight so you can move quickly during demos.
+                Paste text or drop a plain text file. We keep this step lightweight so you can move quickly during demos.
               </p>
             </div>
             <Badge variant="secondary" className="self-start lg:self-center">{inputText.length} characters</Badge>
@@ -148,31 +126,7 @@ export function ContentInputStep() {
             </div>
           )}
 
-          {activeMode === 'youtube' && (
-            <div className="h-full min-h-[320px] grid place-items-center">
-              <div className="w-full max-w-xl text-center">
-                <div className="mx-auto size-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
-                  <Link2 className="size-6" />
-                </div>
-                <h3 className="mt-4 text-2xl">Fetch YouTube Captions</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Paste a YouTube URL with available captions and we’ll extract the transcript into the editor.
-                </p>
 
-                <div className="mt-5 flex gap-2">
-                  <Input
-                    placeholder="https://youtube.com/watch?v=..."
-                    value={youtubeUrl}
-                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                    className="h-12"
-                  />
-                  <Button onClick={handleYoutubeFetch} disabled={isFetchingYoutube} className="h-12 px-4">
-                    {isFetchingYoutube ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {activeMode === 'file' && (
             <div className="h-full min-h-[320px] grid place-items-center">
