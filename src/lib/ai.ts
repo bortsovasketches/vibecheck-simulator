@@ -9,15 +9,13 @@ export const getAIModel = (apiKey: string) => {
     const google = createGoogleGenerativeAI({
         apiKey,
     });
-    // User requested "Gemini 3" based on latest documentation.
-    return google('gemini-3.0-pro-001');
+    // Using gemini-3-pro-preview as confirmed by latest API docs
+    return google('gemini-3-pro-preview');
 };
 
 export type ContentMode = 'standard' | 'crisis';
 
 export const generatePersonas = async (content: string, apiKey: string, mode: ContentMode = 'standard') => {
-    console.log('generatePersonas called with key:', apiKey);
-
     // MOCK MODE FOR TESTING
     if (apiKey === 'test-key' || apiKey === 'test-key-123' || (apiKey && apiKey.startsWith('test-'))) {
         console.log('Using MOCK MODE for generatePersonas');
