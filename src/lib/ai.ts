@@ -1,5 +1,4 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
@@ -9,7 +8,7 @@ export const getAIModel = (apiKey: string) => {
     const google = createGoogleGenerativeAI({
         apiKey,
     });
-    // Using gemini-3-pro-preview as confirmed by latest API docs
+    // corrected to gemini-3-pro-preview based on docs
     return google('gemini-3-pro-preview');
 };
 
@@ -61,7 +60,7 @@ export const generatePersonas = async (content: string, apiKey: string, mode: Co
         2. **Infer Psychographics**: What are their anxieties, values, and worldviews?
         3. **Determine the Stake**: What do they stand to gain or lose?
         4. **Generate Personas**: Create exactly ${count} personas that embody these specific roles.
-
+        
         IMPORTANT: Generate "Sci-Fi Futurist" names for these personas (e.g., XAe-12, Nova Prime).
         The 'role' field must be the archetypal role (e.g. "Reviewer #2"), not a generic job title.`;
     }
@@ -94,8 +93,6 @@ export const generatePersonas = async (content: string, apiKey: string, mode: Co
 };
 
 export const generateWildcard = async (content: string, apiKey: string) => {
-    console.log('generateWildcard called with key:', apiKey);
-
     // MOCK MODE FOR TESTING
     if (apiKey === 'test-key' || apiKey === 'test-key-123' || (apiKey && apiKey.startsWith('test-'))) {
         console.log('Using MOCK MODE for generateWildcard');

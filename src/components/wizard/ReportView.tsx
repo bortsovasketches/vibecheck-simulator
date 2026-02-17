@@ -8,13 +8,11 @@ import {
   CheckCircle2,
   XCircle,
   ArrowRight,
-  Download,
   RefreshCw,
   Lightbulb,
   Quote,
   Activity,
   Target,
-  Loader2,
   FileText
 } from 'lucide-react';
 import { motion, useSpring, useTransform, useMotionValue } from 'framer-motion';
@@ -28,7 +26,7 @@ export function ReportView() {
   const { finalReport, interviewResults, reset, contentMode } = useWizardStore();
   const [activeTab, setActiveTab] = useState(interviewResults?.[0]?.personaName);
   const [spectrogramData] = useState(() => generateSpectrogramData(34));
-  const [isExporting, setIsExporting] = useState(false);
+
 
   const scoreValue = useMotionValue(0);
   const rawScore = finalReport?.overallScore || 0;
