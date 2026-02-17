@@ -14,12 +14,10 @@ import {
   Quote,
   Activity,
   Target,
-  Loader2
+  Loader2,
+  FileText
 } from 'lucide-react';
 import { motion, useSpring, useTransform, useMotionValue } from 'framer-motion';
-import html2canvas from 'html2canvas'; // Remove
-import { toPng } from 'html-to-image'; // Add
-import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 
 const generateSpectrogramData = (length: number) => {
@@ -45,79 +43,43 @@ export function ReportView() {
     }
   }, [finalReport, scoreValue, targetScore]);
 
-  const handleExportPDF = async () => {
-    const element = document.getElementById('report-content');
-    if (!element) return;
+  const handleExportText = () => {
+    if (!finalReport) return;
 
-    setIsExporting(true);
-    toast.info('Generating PDF report...');
+    const sections = [
+      `VIBECHECK SIMULATOR REPORT - ${contentMode === 'crisis' ? 'CRISIS MODE' : 'STANDARD MODE'}`,
+      `Generated: ${new Date().toLocaleString()}`,
+      `Overall Score: ${finalReport.overallScore}/10`,
+      `Executive Summary:\n${finalReport.executiveSummary}`,
+      `\n--- AUDIENCE ALIGNMENT ---`,
+      ...finalReport.audienceAlignment.map(a => `- ${a.audience}: ${a.alignmentScore}/10\n  Takeaway: ${a.keyTakeaway}`),
+      `\n--- STRATEGIC ANALYSIS ---`,
+      `Strengths:\n${finalReport.topStrengths.map(s => `- ${s}`).join('\n')}`,
+      `Weaknesses:\n${finalReport.topWeaknesses.map(w => `- ${w}`).join('\n')}`,
+      `\n--- ACTIONABLE RECOMMENDATIONS ---`,
+      ...finalReport.actionableRecommendations.map(r => `[${r.impact}] ${r.area}: ${r.suggestion}`),
+      `\n--- TONE ANALYSIS ---`,
+      `Defensiveness: ${finalReport.toneAnalysis.defensiveness}/10`,
+      `Corporate Speak: ${finalReport.toneAnalysis.corporatespeak}/10`,
+      `Empathy: ${finalReport.toneAnalysis.empathy}/10`,
+      `Clarity: ${finalReport.toneAnalysis.clarity}/10`,
+      `\n--- GO/NO-GO DECISION ---`,
+      `Decision: ${finalReport.goNoGo.decision} (${finalReport.goNoGo.confidenceScore}% Confidence)`,
+      `Reasoning: ${finalReport.goNoGo.reasoning}`,
+      `\n=== PERSONA DEEP DIVES ===`,
+      ...interviewResults.map(p => `\n[${p.personaName} - ${p.personaRole}]\nScore: ${p.resonanceScore}/10\nSummary: ${p.summary}\nStrengths: ${p.strengths.join(', ')}\nFriction: ${p.confusionPoints.join(', ')}\nSuggestions: ${p.suggestions.join(', ')}`)
+    ];
 
-    try {
-      // Create a clone of the element to render the full scrollable height
-      const clone = element.cloneNode(true) as HTMLElement;
-
-      // Apply styles to ensure full visibility in the clone
-      clone.style.height = 'auto';
-      clone.style.overflow = 'visible';
-      clone.style.position = 'absolute';
-      clone.style.top = '-9999px';
-      clone.style.left = '0';
-      clone.style.width = `${element.offsetWidth}px`;
-      clone.className = element.className; // Preserve classes
-
-      // Append to body temporarily
-      document.body.appendChild(clone);
-
-      // Wait a tick for styles to apply and images to load if needed
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const dataUrl = await toPng(clone, {
-        cacheBust: true,
-        filter: (node) => !node.classList?.contains('no-export'),
-        backgroundColor: '#0c0a15', // Ensure dark background
-        height: clone.scrollHeight,
-        width: clone.scrollWidth,
-      });
-
-      // Cleanup
-      document.body.removeChild(clone);
-
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      let heightLeft = pdfHeight;
-      let position = 0;
-
-      // Add first page
-      pdf.addImage(dataUrl, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-
-      // Add subsequent pages if content overflows
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight; // Shift position up
-        pdf.addPage();
-        // Calculate the position for the next page segment
-        // The negative position moves the image up to show the next chunk
-        pdf.addImage(dataUrl, 'PNG', 0, -(pdfHeight - heightLeft), pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save(`vibecheck-report-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('PDF downloaded successfully');
-    } catch (error) {
-      console.error('PDF Export failed:', error);
-      toast.error('Failed to export PDF');
-    } finally {
-      setIsExporting(false);
-    }
+    const blob = new Blob([sections.join('\n\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vibecheck-report-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Report downloaded as text file');
   };
 
   if (!finalReport) return null;
@@ -144,9 +106,8 @@ export function ReportView() {
         </div>
         <div className="flex flex-wrap gap-2 no-export">
           <Button variant="outline" onClick={reset}><RefreshCw className="size-4" /> Run Again</Button>
-          <Button onClick={handleExportPDF} disabled={isExporting}>
-            {isExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-            {isExporting ? 'Exporting...' : 'Export PDF'}
+          <Button onClick={handleExportText}>
+            <FileText className="size-4" /> Export Report
           </Button>
         </div>
       </section>
