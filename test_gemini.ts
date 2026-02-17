@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 
-const apiKey = 'AIzaSyDT6-SWvfa5sx1LYrhO7IRdtVt6YkNIyTo';
+const apiKey = 'FAKE-123';
 
 async function testGemini() {
     console.log('Testing Gemini 1.5 Pro with provided key...');
