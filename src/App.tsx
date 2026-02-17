@@ -30,6 +30,9 @@ function App() {
 
   return (
     <>
+      <div className="bg-primary/10 text-primary-foreground text-xs text-center py-1 font-medium bg-primary">
+        This is an AI experiment. Mistakes are likely.
+      </div>
       <AppLayout>
         <AnimatePresence mode="wait">
           <motion.div
